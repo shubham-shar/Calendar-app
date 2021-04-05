@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS EMPLOYEE (
     updated_at timestamp
 );
 
-CREATE TABLE IF NOT EXISTS EMPLOYEE_CALENDER (
+CREATE TABLE IF NOT EXISTS EMPLOYEE_CALENDAR (
     id bigint PRIMARY KEY auto_increment,
     created_at timestamp,
-    calender_date date not null,
+    calendar_date date not null,
     updated_at timestamp,
     employee_id bigint,
     foreign key (employee_id) references EMPLOYEE(id)
@@ -24,6 +24,6 @@ CREATE TABLE IF NOT EXISTS EVENT (
     start_time timestamp,
     title varchar(255),
     updated_at timestamp,
-    employee_calender_id bigint,
-    foreign key (employee_calender_id) references EMPLOYEE_CALENDER(id)
+    employee_calendar_id bigint,
+    foreign key (employee_calendar_id) references EMPLOYEE_CALENDAR(id)
 );

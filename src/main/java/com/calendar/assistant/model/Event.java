@@ -1,4 +1,4 @@
-package com.calender.assistant.model;
+package com.calendar.assistant.model;
 
 import java.util.Date;
 import java.util.Objects;
@@ -60,9 +60,9 @@ public class Event {
     private Date updatedAt;
     
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "employee_calender_id")
+    @JoinColumn(name = "employee_calendar_id")
     @JsonBackReference(value = "events")
-    private EmployeeCalender employeeCalender;
+    private EmployeeCalendar employeeCalendar;
     
     @Override
     public String toString() {

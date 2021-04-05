@@ -1,4 +1,4 @@
-package com.calender.assistant.model;
+package com.calendar.assistant.model;
 
 import java.util.Date;
 import java.util.Objects;
@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Email;
@@ -56,14 +55,14 @@ public class Employee {
     private Date updatedAt;
     
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "calenders")
-    private Set<EmployeeCalender> calenders;
+    @JsonManagedReference(value = "calendars")
+    private Set<EmployeeCalendar> calendars;
     
     @Override
     public String toString() {
         return "Employee{" + "id=" + id + ", emailId='" + emailId + '\'' + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
-                + ", calender=" + calenders + '}';
+                + ", calender=" + calendars + '}';
     }
     
     @Override
@@ -78,11 +77,11 @@ public class Employee {
         return Objects.equals(id, employee.id) && Objects.equals(emailId, employee.emailId) && Objects
                 .equals(firstName, employee.firstName) && Objects.equals(lastName, employee.lastName) && Objects
                 .equals(createdAt, employee.createdAt) && Objects.equals(updatedAt, employee.updatedAt) && Objects
-                .equals(calenders, employee.calenders);
+                .equals(calendars, employee.calendars);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(id, emailId, firstName, lastName, createdAt, updatedAt, calenders);
+        return Objects.hash(id, emailId, firstName, lastName, createdAt, updatedAt, calendars);
     }
 }

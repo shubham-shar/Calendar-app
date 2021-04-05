@@ -1,8 +1,6 @@
-package com.calender.assistant.model.dto;
+package com.calendar.assistant.model.dto;
 
 import java.util.Date;
-import java.util.TimeZone;
-
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 

@@ -1,4 +1,4 @@
-package com.calender.assistant.exceptions;
+package com.calendar.assistant.exceptions;
 
 /**
  * @author shubham sharma

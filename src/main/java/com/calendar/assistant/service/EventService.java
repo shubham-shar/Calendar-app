@@ -1,4 +1,4 @@
-package com.calender.assistant.service;
+package com.calendar.assistant.service;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -14,17 +14,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
-import com.calender.assistant.exceptions.EntityNotFoundException;
-import com.calender.assistant.exceptions.InvalidRequestException;
-import com.calender.assistant.exceptions.UnauthorizedException;
-import com.calender.assistant.model.Employee;
-import com.calender.assistant.model.EmployeeCalender;
-import com.calender.assistant.model.Event;
-import com.calender.assistant.model.dto.BookEvent;
-import com.calender.assistant.model.dto.EventDto;
-import com.calender.assistant.repository.EmployeeCalenderRepository;
-import com.calender.assistant.repository.EmployeeRepository;
-import com.calender.assistant.repository.EventRepository;
+import com.calendar.assistant.exceptions.EntityNotFoundException;
+import com.calendar.assistant.exceptions.InvalidRequestException;
+import com.calendar.assistant.exceptions.UnauthorizedException;
+import com.calendar.assistant.model.Employee;
+import com.calendar.assistant.model.EmployeeCalendar;
+import com.calendar.assistant.model.Event;
+import com.calendar.assistant.model.dto.BookEvent;
+import com.calendar.assistant.model.dto.EventDto;
+import com.calendar.assistant.model.dto.Meeting;
+import com.calendar.assistant.repository.EmployeeRepository;
+import com.calendar.assistant.repository.EventRepository;
+import com.calendar.assistant.repository.EmployeeCalenderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
@@ -57,50 +58,50 @@ public class EventService {
             throw new EntityNotFoundException("Employee not found with id: " + id);
         });
     
-        Optional<EmployeeCalender> employeeCalender =
-                employeeCalenderRepository.findByEmployeeIdAndCalenderDate(id, bookEvent.getDate());
+        Optional<EmployeeCalendar> employeeCalender =
+                employeeCalenderRepository.findByEmployeeIdAndCalendarDate(id, bookEvent.getDate());
     
         employeeCalender.ifPresentOrElse(calender -> {
             Set<Event> events = Optional.ofNullable(calender.getEvents()).orElse(new HashSet<>());
             if(events.isEmpty()) {
                 Event event = createEvent(bookEvent);
-                event.setEmployeeCalender(calender);
+                event.setEmployeeCalendar(calender);
                 calender.getEvents().add(event);
                 employeeCalenderRepository.save(calender);
             } else {
-                if(isAnySlotPresentForEmployee(events, bookEvent)) {
+                if(isAnySlotPresentForEmployee(events, bookEvent.getStartTime(), bookEvent.getEndTime())) {
                     Event event = createEvent(bookEvent);
-                    event.setEmployeeCalender(calender);
+                    event.setEmployeeCalendar(calender);
                     calender.getEvents().add(event);
                     employeeCalenderRepository.save(calender);
                 } else {
                     log.info("employee {} not available for meeting for given time", id);
-                    throw new UnauthorizedException( "employee " + id + " not available for meeting for given time");
+                    throw new UnauthorizedException("employee " + id + " not available for meeting for given time");
                 }
             }
         }, () -> {
-            EmployeeCalender empCalender = new EmployeeCalender();
+            EmployeeCalendar empCalender = new EmployeeCalendar();
             empCalender.setEmployee(employee);
-            empCalender.setCalenderDate(bookEvent.getDate());
+            empCalender.setCalendarDate(bookEvent.getDate());
             Event event = createEvent(bookEvent);
-            event.setEmployeeCalender(empCalender);
+            event.setEmployeeCalendar(empCalender);
             empCalender.setEvents(Collections.singleton(event));
             empCalender.setEmployee(employee);
-            employee.getCalenders().add(empCalender);
+            employee.getCalendars().add(empCalender);
             employeeRepository.save(employee);
         });
         
     
     }
     
-    private boolean isAnySlotPresentForEmployee(Set<Event> events, BookEvent bookEvent) {
+    private boolean isAnySlotPresentForEmployee(Set<Event> events, Date start, Date end) {
         return events.stream().noneMatch(event -> {
-            return event.getStartTime().toInstant().equals(bookEvent.getStartTime().toInstant())
-                    || (event.getStartTime().before(bookEvent.getStartTime())
-                            && event.getEndTime().after(bookEvent.getStartTime()))
-                    || (event.getStartTime().before(bookEvent.getEndTime())
-                            && event.getEndTime().after(bookEvent.getEndTime()))
-                    || (event.getEndTime().toInstant().equals(bookEvent.getEndTime().toInstant()));
+            return event.getStartTime().toInstant().equals(start.toInstant())
+                    || (event.getStartTime().before(start)
+                            && event.getEndTime().after(start))
+                    || (event.getStartTime().before(end)
+                            && event.getEndTime().after(end))
+                    || (event.getEndTime().toInstant().equals(end.toInstant()));
     
         });
     }
@@ -137,10 +138,10 @@ public class EventService {
             throw new EntityNotFoundException("Employee not found with id: " + secondEmpId);
         });
     
-        Optional<EmployeeCalender> firstEmpCalender =
-                employeeCalenderRepository.findByEmployeeIdAndCalenderDate(firstEmployee.getId(), date);
-        Optional<EmployeeCalender> secondEmpCalender =
-                employeeCalenderRepository.findByEmployeeIdAndCalenderDate(secondEmployee.getId(), date);
+        Optional<EmployeeCalendar> firstEmpCalender =
+                employeeCalenderRepository.findByEmployeeIdAndCalendarDate(firstEmployee.getId(), date);
+        Optional<EmployeeCalendar> secondEmpCalender =
+                employeeCalenderRepository.findByEmployeeIdAndCalendarDate(secondEmployee.getId(), date);
     
         Set<Event> eventsOfFirstEmp = firstEmpCalender
                 .map(cal -> Optional.ofNullable(cal.getEvents()).orElse(new HashSet<>())).orElse(new HashSet<>());
@@ -204,5 +205,26 @@ public class EventService {
         }
         return response.stream().sorted(Comparator.comparing(EventDto::getStartDate)).collect(
                 Collectors.toCollection(LinkedHashSet::new));
+    }
+    
+    public Set<String> bookMeeting(Meeting meeting) {
+        Set<Employee> employees = employeeRepository.findByEmailIdIn(meeting.getEmails());
+        if(employees.size() != meeting.getEmails().size()) {
+            Set<String> emails = employees.stream().map(Employee::getEmailId).collect(Collectors.toSet());
+            Set<String> allEmails = meeting.getEmails();
+            allEmails.removeAll(emails);
+            log.info("Given email ids {} are not present in the system", allEmails);
+            throw new InvalidRequestException("Given email ids " + allEmails + " are not present in the system");
+        }
+        Set<EmployeeCalendar> dates = employeeCalenderRepository
+                .findByCalendarDateAndEmployeeIdIn(meeting.getDate(), employees.stream().map(Employee::getId)
+                                                                               .collect(Collectors.toSet()));
+        Set<String> response = new HashSet<>();
+        dates.forEach(calender -> {
+                if(!isAnySlotPresentForEmployee(calender.getEvents(), meeting.getStartTime(), meeting.getEndTime())) {
+                    response.add(calender.getEmployee().getEmailId());
+                }
+             });
+        return response;
     }
 }

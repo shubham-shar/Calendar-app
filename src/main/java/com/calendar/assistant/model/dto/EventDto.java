@@ -1,4 +1,4 @@
-package com.calender.assistant.model.dto;
+package com.calendar.assistant.model.dto;
 
 import java.util.Date;
 

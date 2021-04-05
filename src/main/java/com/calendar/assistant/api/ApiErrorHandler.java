@@ -1,11 +1,11 @@
-package com.calender.assistant.api;
+package com.calendar.assistant.api;
 
 import java.io.IOException;
 import javax.validation.ConstraintViolationException;
 
-import com.calender.assistant.exceptions.EntityNotFoundException;
-import com.calender.assistant.exceptions.InvalidRequestException;
-import com.calender.assistant.exceptions.UnauthorizedException;
+import com.calendar.assistant.exceptions.EntityNotFoundException;
+import com.calendar.assistant.exceptions.InvalidRequestException;
+import com.calendar.assistant.exceptions.UnauthorizedException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

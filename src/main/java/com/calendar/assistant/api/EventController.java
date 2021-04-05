@@ -1,16 +1,19 @@
-package com.calender.assistant.api;
+package com.calendar.assistant.api;
 
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Set;
 import javax.validation.Valid;
 
-import com.calender.assistant.model.dto.BookEvent;
-import com.calender.assistant.model.dto.EventDto;
-import com.calender.assistant.service.EventService;
+import com.calendar.assistant.model.dto.BookEvent;
+import com.calendar.assistant.model.dto.EventDto;
+import com.calendar.assistant.model.dto.Meeting;
+import com.calendar.assistant.service.EventService;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,17 +36,25 @@ public class EventController {
     EventService eventService;
     
     @PostMapping("/book")
-    private String bookEventForEmployee(@RequestParam Long id, @Valid @RequestBody BookEvent bookEvent) {
+    private ResponseEntity<String> bookEventForEmployee(@RequestParam Long id,
+            @Valid @RequestBody BookEvent bookEvent) {
         log.info("Received request to book event for {} with details {}", id, bookEvent.toString());
         eventService.bookEvent(id, bookEvent);
-        return "Event Booked";
+        return ResponseEntity.status(HttpStatus.CREATED).body("Event Booked");
     }
     
     @GetMapping("/available-slots")
-    private Set<EventDto> findAvailableSlots(@RequestParam Long firstEmpId, @RequestParam Long secondEmpId,
+    private ResponseEntity<Set<EventDto>> findAvailableSlots(@RequestParam Long firstEmpId,
+            @RequestParam Long secondEmpId,
             @Valid @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd")
             @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Kolkata") Date date) throws ParseException {
         log.info("Received request to find slots {} and {} on {}", firstEmpId, secondEmpId, date);
-        return eventService.fetchSlots(firstEmpId, secondEmpId, date);
+        return ResponseEntity.ok(eventService.fetchSlots(firstEmpId, secondEmpId, date));
+    }
+    
+    @GetMapping("/meeting")
+    private ResponseEntity<Set<String>> bookMeetingForEmployees(@Valid @RequestBody Meeting bookEvent) {
+        log.info("Received request to book meeting for with details {}", bookEvent.toString());
+        return ResponseEntity.ok(eventService.bookMeeting(bookEvent));
     }
 }

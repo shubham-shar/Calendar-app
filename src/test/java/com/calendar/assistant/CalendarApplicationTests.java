@@ -1,10 +1,10 @@
-package com.calender.assistant;
+package com.calendar.assistant;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CalenderApplicationTests {
+class CalendarApplicationTests {
 
 	@Test
 	void contextLoads() {

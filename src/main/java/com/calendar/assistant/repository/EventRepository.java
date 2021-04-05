@@ -1,8 +1,8 @@
-package com.calender.assistant.repository;
+package com.calendar.assistant.repository;
 
 import java.util.Set;
 
-import com.calender.assistant.model.Event;
+import com.calendar.assistant.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,7 +21,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
         private Queries(){}
         
         private final static String FETCH_EMPLOYEE_EVENTS = "select e from Employee emp "
-                + "join EmployeeCalender emp_cal on emp.id = emp_cal.employee.id "
-                + "join Event e on e.employeeCalender.id  = emp_cal.id where emp.id = :id";
+                + "join EmployeeCalendar emp_cal on emp.id = emp_cal.employee.id "
+                + "join Event e on e.employeeCalendar.id  = emp_cal.id where emp.id = :id";
     }
 }
